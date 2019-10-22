@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMutableArray *craftsArray;
 /// 所有craft数据model
 @property (nonatomic, strong) NSMutableArray *allCraftsArray;
+/// allCraftsArray - craftsArray
 @property (nonatomic, strong) NSMutableArray *otherCraftsArray;
 @end
 
