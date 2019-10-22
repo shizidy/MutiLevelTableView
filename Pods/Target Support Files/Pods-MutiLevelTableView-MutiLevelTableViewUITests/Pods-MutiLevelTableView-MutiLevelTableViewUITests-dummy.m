@@ -1,0 +1,5 @@
+#import <Foundation/Foundation.h>
+@interface PodsDummy_Pods_MutiLevelTableView_MutiLevelTableViewUITests : NSObject
+@end
+@implementation PodsDummy_Pods_MutiLevelTableView_MutiLevelTableViewUITests
+@end
