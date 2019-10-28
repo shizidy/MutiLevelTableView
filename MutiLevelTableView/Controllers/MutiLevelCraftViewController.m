@@ -86,6 +86,7 @@
             [indexArray addObject:index_path];
             [self.viewModel.craftsArray insertObject:modelArray[i - 1] atIndex:indexPath.row + i];
         }
+        //执行插入行
         [tableView beginUpdates];
         [tableView insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
@@ -128,6 +129,7 @@
             [self.viewModel.statesArray addObject:modelDict];
         }
         [self.viewModel.craftsArray removeObjectsInRange:NSMakeRange(indexPath.row + 1, length)];
+        //执行删除行
         [tableView beginUpdates];
         [tableView deleteRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];

@@ -58,8 +58,8 @@
         [cell makeArrowImgViewRotation:M_PI / 2];
         
         NSArray *array = @[];
+        BOOL isMatched = NO;
         if (self.viewModel.statesArray.count > 0) {
-            BOOL isMatched = NO;
             for (NSMutableDictionary *dict in self.viewModel.statesArray) {
                 NSString *name = dict[@"name"];
                 if ([name isEqualToString:model.name]) {
@@ -74,12 +74,20 @@
         } else {
             array = model.children;
         }
+        //计算level
+        if (!isMatched || self.viewModel.statesArray.count == 0) {//说明是新增的array
+            for (MutiLevelModel *levelModel in array) {
+                levelModel.level = model.level + 1;
+            }
+        }
+        
         NSMutableArray *marray = [NSMutableArray array];
         for (int i = 1; i <= array.count; i++) {
             NSIndexPath *index_path = [NSIndexPath indexPathForRow:indexPath.row + i inSection:0];
             [marray addObject:index_path];
             [self.viewModel.placesArray insertObject:array[i - 1] atIndex:indexPath.row + i];
         }
+        //执行插入行
         [tableView beginUpdates];
         [tableView insertRowsAtIndexPaths:marray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
@@ -119,6 +127,7 @@
             [self.viewModel.statesArray addObject:modelDict];
         }
         [self.viewModel.placesArray removeObjectsInRange:NSMakeRange(indexPath.row + 1, length)];
+        //执行删除行
         [tableView beginUpdates];
         [tableView deleteRowsAtIndexPaths:marray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];

@@ -26,6 +26,10 @@
     //            NSLog(@"%@", jsonArray);
     NSMutableArray *provinces = [MutiLevelModel mj_objectArrayWithKeyValuesArray:jsonArray];
     [self.placesArray addObjectsFromArray:provinces];
+    
+    for (MutiLevelModel *model in self.placesArray) {
+        model.level = 1;//初始化第一层level = 1
+    }
 }
 
 - (void)initCraftResource {

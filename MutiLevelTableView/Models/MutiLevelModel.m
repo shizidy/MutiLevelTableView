@@ -14,9 +14,6 @@
     return @{@"children":@"MutiLevelSubModel"};
 }
 
-- (NSInteger)level {
-    return 1;
-}
 @end
 
 
@@ -27,9 +24,6 @@
     return @{@"children":@"MutiLevelSubSubModel"};
 }
 
-- (NSInteger)level {
-    return 2;
-}
 
 - (NSString *)description {
     return [NSString stringWithFormat:@"name=%@ level=%ld code=%@", self.name, (long)self.level, self.code];
@@ -41,10 +35,6 @@
 
 @implementation MutiLevelSubSubModel
 
-- (NSInteger)level {
-    return 3;
-}
-
 @end
 
 
@@ -53,10 +43,6 @@
 
 + (NSDictionary *)mj_replacedKeyFromPropertyName {
     return @{@"craft_id":@"id"};
-}
-
-- (NSInteger)level {
-    return 1;
 }
 
 @end
