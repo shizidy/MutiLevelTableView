@@ -11,7 +11,9 @@
 #import "MutiLevelViewModel.h"
 
 @interface MutiLevelViewController () <UITableViewDelegate, UITableViewDataSource>
+/// tableView
 @property (nonatomic, strong) UITableView *tableView;
+/// viewModel
 @property (nonatomic, strong) MutiLevelViewModel *viewModel;
 @end
 
@@ -21,7 +23,6 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:self.tableView];
-    
     // Do any additional setup after loading the view.
 }
 
@@ -46,52 +47,49 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    // 获取数据model
     MutiLevelModel *model = self.viewModel.placesArray[indexPath.row];
+    // 获取cell
     MutiLevelCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
     if (!model.children) {
         return;
     }
     if (!model.isExpand) {
+#pragma mark - 展开层级
         model.isExpand = YES;
         // 执行箭头旋转动画
         [cell makeArrowImgViewRotation:M_PI / 2];
-        
-        NSArray *array = @[];
-        BOOL isMatched = NO;
-        if (self.viewModel.statesArray.count > 0) {
-            for (NSMutableDictionary *dict in self.viewModel.statesArray) {
-                NSString *code = dict[@"code"];
-                if ([code isEqualToString:model.code]) {
-                    array = dict[@"array"];
-                    isMatched = YES;
-                    break;
-                }
-            }
-            if (!isMatched) {
-                array = model.children;
-            }
-        } else {
-            array = model.children;
-        }
-        //计算level
-        if (!isMatched || self.viewModel.statesArray.count == 0) {//说明是新增的array
-            for (MutiLevelModel *levelModel in array) {
-                levelModel.level = model.level + 1;
+        //
+        NSArray *modelArray = @[];
+        for (NSString *code in self.viewModel.statesDictionary.allKeys) {
+            if ([code isEqualToString:model.code]) {
+                modelArray = self.viewModel.statesDictionary[code];
+                break;
             }
         }
-        
-        NSMutableArray *marray = [NSMutableArray array];
-        for (int i = 1; i <= array.count; i++) {
-            NSIndexPath *index_path = [NSIndexPath indexPathForRow:indexPath.row + i inSection:0];
-            [marray addObject:index_path];
-            [self.viewModel.placesArray insertObject:array[i - 1] atIndex:indexPath.row + i];
+        // 没有匹配到
+        if (modelArray.count == 0) {
+            modelArray = model.children;
+            // 计算level
+            for (MutiLevelModel *subModel in modelArray) {
+                subModel.level = model.level + 1;
+            }
+        }
+        // 计算indexPathArray
+        NSMutableArray *indexPathArray = [NSMutableArray array];
+        for (int i = 0; i < modelArray.count; i++) {
+            NSIndexPath *tmpIndexPath = [NSIndexPath indexPathForRow:indexPath.row + 1 + i inSection:0];
+            [indexPathArray addObject:tmpIndexPath];
+            // 插入数据model
+            [self.viewModel.placesArray insertObject:modelArray[i] atIndex:indexPath.row + 1 + i];
         }
         //执行插入行
         [tableView beginUpdates];
-        [tableView insertRowsAtIndexPaths:marray withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView insertRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
     } else {
+#pragma mark - 关闭层级
         model.isExpand = NO;
         //执行箭头旋转动画
         [cell makeArrowImgViewRotation:0];
@@ -100,40 +98,30 @@
          2.怎么查找要保存的数据，思路：1.两个相同层级（level）之间的数据即为该层级的展开状态下的数据 2.该层级与首次找到比他大的层级之间的数据
          3.例如北京市与河北省之间，假如北京这一层级处于展开状态，在placesArray中寻找北京（level1=0）与河北省（level2=0）判断条件level1=level2，把这两者中间的数据保存起来，或者北京市市辖区（level1=1）与河北省（level2=0）之间的数据，判断条件level1>level2
          */
-        NSMutableArray *marray = [NSMutableArray array];
+        NSMutableArray *indexPathArray = [NSMutableArray array];
+        NSMutableArray *modelArray = [NSMutableArray array];
         NSInteger length = 0;
         NSInteger i = indexPath.row + 1;
         for (i = indexPath.row + 1; i < self.viewModel.placesArray.count; i++) {
-            MutiLevelModel *endModel = self.viewModel.placesArray[i];
-            if (model.level >= endModel.level) {
+            MutiLevelModel *tmpModel = self.viewModel.placesArray[i];
+            if (model.level >= tmpModel.level) {
                 break;
             }
-            NSIndexPath *index_path = [NSIndexPath indexPathForRow:i inSection:0];
-            [marray addObject:index_path];
+            NSIndexPath *tmpIndexPath = [NSIndexPath indexPathForRow:i inSection:0];
+            [indexPathArray addObject:tmpIndexPath];
+            [modelArray addObject:tmpModel];
         }
         length = i - indexPath.row - 1;
-        if (length <= 0) {
+        if (length == 0) {
             return;
         }
-        NSMutableDictionary *modelDict = [NSMutableDictionary dictionary];
-        BOOL isMatched = NO;
-        for (NSMutableDictionary *dict in self.viewModel.statesArray) {
-            NSString *code = dict[@"code"];
-            if ([code isEqualToString:model.code]) {
-                dict[@"array"] = [self.viewModel.placesArray subarrayWithRange:NSMakeRange(indexPath.row + 1, length)];
-                isMatched = YES;
-                break;
-            }
-        }
-        if (!isMatched) {
-            modelDict[@"array"] = [self.viewModel.placesArray subarrayWithRange:NSMakeRange(indexPath.row + 1, length)];
-            modelDict[@"code"] = model.code;
-            [self.viewModel.statesArray addObject:modelDict];
-        }
+        // 更新statesDictionary
+        self.viewModel.statesDictionary[model.code] = modelArray;
+        // 删除数据model
         [self.viewModel.placesArray removeObjectsInRange:NSMakeRange(indexPath.row + 1, length)];
         //执行删除行
         [tableView beginUpdates];
-        [tableView deleteRowsAtIndexPaths:marray withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView deleteRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
     }
 }

@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MutiLevelViewModel : NSObject
 /// 统一存储省，市，县的数据model
 @property (nonatomic, strong) NSMutableArray *placesArray;
-/// 记录条目关闭前的条目下的展开状态 元素是字典 @[@{@"name":name, @"array":array}, @{@"name":name1, @"array":array1}] array代表数据模型的数组 name代表地名
-@property (nonatomic, strong) NSMutableArray *statesArray;
+/// 记录条目关闭前的条目下的展开状态 格式 @{@"id1":array1, @"id2":array2} 或者@{@"code1":array1, @"code2":array2}
+@property (nonatomic, strong) NSMutableDictionary *statesDictionary;
 /// 存储数据model
 @property (nonatomic, strong) NSMutableArray *craftsArray;
 /// 所有craft数据model

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <MJExtension/MJExtension.h>
 NS_ASSUME_NONNULL_BEGIN
-@class MutiLevelSubModel;
+
 @interface MutiLevelModel : NSObject
 /// 下级
 @property (nonatomic, strong) NSArray *children;
@@ -21,30 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSInteger level;
 /// 记录是否展开
 @property (nonatomic, assign) BOOL isExpand;
-
-@end
-
-@class MutiLevelSubSubModel;
-@interface MutiLevelSubModel : MutiLevelModel
-///// 下级
-//@property (nonatomic, strong) NSArray *children;
-///// 城市代码
-//@property (nonatomic, strong) NSString *code;
-///// 城市名称
-//@property (nonatomic, strong) NSString *name;
-///// 层级
-//@property (nonatomic, assign) NSInteger level;
-@end
-
-@interface MutiLevelSubSubModel : MutiLevelModel
-///// 下级
-//@property (nonatomic, strong) NSArray *children;
-///// 城市代码
-//@property (nonatomic, strong) NSString *code;
-///// 城市名称
-//@property (nonatomic, strong) NSString *name;
-///// 层级
-//@property (nonatomic, assign) NSInteger level;
 @end
 
 @interface MutiLevelCraftModel : NSObject

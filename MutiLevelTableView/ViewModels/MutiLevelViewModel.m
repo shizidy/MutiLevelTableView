@@ -26,7 +26,6 @@
     //            NSLog(@"%@", jsonArray);
     NSMutableArray *provinces = [MutiLevelModel mj_objectArrayWithKeyValuesArray:jsonArray];
     [self.placesArray addObjectsFromArray:provinces];
-    
     for (MutiLevelModel *model in self.placesArray) {
         model.level = 1;//初始化第一层level = 1
     }
@@ -36,7 +35,7 @@
     NSString *fileStr = [[NSBundle mainBundle] pathForResource:@"Resource" ofType:@"json"];
     NSData *jsonData = [NSData dataWithContentsOfFile:fileStr];
     NSArray *jsonArray = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
-    NSLog(@"%@", jsonArray);
+//    NSLog(@"%@", jsonArray);
     NSMutableArray *crafts = [MutiLevelCraftModel mj_objectArrayWithKeyValuesArray:jsonArray];
     [self.allCraftsArray addObjectsFromArray:crafts];
     for (MutiLevelCraftModel *model in crafts) {
@@ -56,11 +55,11 @@
     return _placesArray;
 }
 
-- (NSMutableArray *)statesArray {
-    if (!_statesArray) {
-        _statesArray = [NSMutableArray array];
+- (NSMutableDictionary *)statesDictionary {
+    if (!_statesDictionary) {
+        _statesDictionary = [NSMutableDictionary dictionary];
     }
-    return _statesArray;
+    return _statesDictionary;
 }
 
 - (NSMutableArray *)craftsArray {

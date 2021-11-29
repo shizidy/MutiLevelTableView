@@ -11,38 +11,19 @@
 @implementation MutiLevelModel
 
 + (NSDictionary *)mj_objectClassInArray {
-    return @{@"children":@"MutiLevelSubModel"};
+    return @{
+        @"children": @"MutiLevelModel"
+    };
 }
 
 @end
-
-
-//
-@implementation MutiLevelSubModel
-
-+ (NSDictionary *)mj_objectClassInArray {
-    return @{@"children":@"MutiLevelSubSubModel"};
-}
-
-
-- (NSString *)description {
-    return [NSString stringWithFormat:@"name=%@ level=%ld code=%@", self.name, (long)self.level, self.code];
-}
-
-@end
-
-
-
-@implementation MutiLevelSubSubModel
-
-@end
-
-
 
 @implementation MutiLevelCraftModel
 
 + (NSDictionary *)mj_replacedKeyFromPropertyName {
-    return @{@"craft_id":@"id"};
+    return @{
+        @"craft_id": @"id"
+    };
 }
 
 @end

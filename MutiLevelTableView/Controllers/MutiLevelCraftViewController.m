@@ -11,7 +11,9 @@
 #import "MutiLevelViewModel.h"
 
 @interface MutiLevelCraftViewController () <UITableViewDelegate, UITableViewDataSource>
+/// tableView
 @property (nonatomic, strong) UITableView *tableView;
+/// viewModel
 @property (nonatomic, strong) MutiLevelViewModel *viewModel;
 @end
 
@@ -27,7 +29,7 @@
 
 #pragma mark - UITableViewDataSource
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    return self.viewModel.craftsArray.count > 0;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -50,53 +52,51 @@
     MutiLevelCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     //获取点击行的数据model
     MutiLevelCraftModel *selectedModel = self.viewModel.craftsArray[indexPath.row];
-    NSMutableArray *modelArray = [NSMutableArray array];
-    BOOL isMatched = NO;
-    if (self.viewModel.statesArray.count > 0) {
-        for (NSMutableDictionary *dict in self.viewModel.statesArray) {
-            NSString *name = dict[@"name"];
-            if ([name isEqualToString:selectedModel.name]) {
-                modelArray = dict[@"array"];
-                isMatched = YES;
-                break;
-            }
-        }
-    }
-    if (!isMatched || self.viewModel.statesArray.count == 0) {
-        NSMutableArray *allCraftsArrayCopy = [self.viewModel.allCraftsArray mutableCopy];
-        [allCraftsArrayCopy removeObjectsInArray:self.viewModel.craftsArray];
-        self.viewModel.otherCraftsArray = allCraftsArrayCopy;
-        for (MutiLevelCraftModel *model in self.viewModel.otherCraftsArray) {
-            if ([model.pid isEqualToString:selectedModel.craft_id]) {
-                [modelArray addObject:model];
-            }
-        }
-        //对marray内的model依据level_code进行排序，因为level_code数值的小数点后数字表示其顺序
-        [self quickSortMutiLevelCraftModelByLevel_codeWithArray:modelArray leftIndex:0 rightIndex:modelArray.count - 1];
-    }
     
     if (!selectedModel.isExpand) {
+#pragma mark - 展开级联
         selectedModel.isExpand = YES;
         //旋转动画
         [cell makeArrowImgViewRotation:M_PI / 2];
         
-        NSMutableArray *indexArray = [NSMutableArray array];
-        for (int i = 1; i <= modelArray.count; i++) {
-            NSIndexPath *index_path = [NSIndexPath indexPathForRow:indexPath.row + i inSection:0];
-            [indexArray addObject:index_path];
-            [self.viewModel.craftsArray insertObject:modelArray[i - 1] atIndex:indexPath.row + i];
+        NSMutableArray *modelArray = [NSMutableArray array];
+        for (NSString *craftId in self.viewModel.statesDictionary.allKeys) {
+            if ([craftId isEqualToString:selectedModel.craft_id]) {
+                NSArray *array = self.viewModel.statesDictionary[craftId];
+                modelArray = array.mutableCopy;
+                break;
+            }
+        }
+        if (modelArray.count == 0) {
+            NSMutableArray *allCraftsArrayCopy = [self.viewModel.allCraftsArray mutableCopy];
+            [allCraftsArrayCopy removeObjectsInArray:self.viewModel.craftsArray];
+            self.viewModel.otherCraftsArray = allCraftsArrayCopy;
+            for (MutiLevelCraftModel *model in self.viewModel.otherCraftsArray) {
+                if ([model.pid isEqualToString:selectedModel.craft_id]) {
+                    [modelArray addObject:model];
+                }
+            }
+            //对marray内的model依据level_code进行排序，因为level_code数值的小数点后数字表示其顺序
+            [self quickSortMutiLevelCraftModelByLevel_codeWithArray:modelArray leftIndex:0 rightIndex:modelArray.count - 1];
+        }
+        NSMutableArray *indexPathArray = [NSMutableArray array];
+        for (int i = 0; i < modelArray.count; i++) {
+            NSIndexPath *tmpIndexPath = [NSIndexPath indexPathForRow:indexPath.row + 1 + i inSection:0];
+            [indexPathArray addObject:tmpIndexPath];
+            [self.viewModel.craftsArray insertObject:modelArray[i] atIndex:indexPath.row + 1 + i];
         }
         //执行插入行
         [tableView beginUpdates];
-        [tableView insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView insertRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
-        
     } else {
+#pragma mark - 关闭级联
         selectedModel.isExpand = NO;
         //旋转动画
         [cell makeArrowImgViewRotation:0];
         
-        NSMutableArray *indexArray = [NSMutableArray array];
+        NSMutableArray *indexPathArray = [NSMutableArray array];
+        NSMutableArray *modelArray = [NSMutableArray array];
         NSInteger length = 0;
         NSInteger i = indexPath.row + 1;
         NSArray *array1 = [selectedModel.level_code componentsSeparatedByString:@"."];
@@ -106,32 +106,24 @@
             if (array1.count >= array2.count) {
                 break;
             }
-            NSIndexPath *index_path = [NSIndexPath indexPathForRow:i inSection:0];
-            [indexArray addObject:index_path];
+            // 添加tmpIndexPath
+            NSIndexPath *tmpIndexPath = [NSIndexPath indexPathForRow:i inSection:0];
+            [indexPathArray addObject:tmpIndexPath];
+            // 添加数据model
+            [modelArray addObject:endModel];
         }
         length = i - indexPath.row - 1;
-        if (length <= 0) {
+        if (length == 0) {
             return;
         }
-        NSMutableDictionary *modelDict = [NSMutableDictionary dictionary];
-        BOOL isMatched = NO;
-        for (NSMutableDictionary *dict in self.viewModel.statesArray) {
-            NSString *name = dict[@"name"];
-            if ([name isEqualToString:selectedModel.name]) {
-                dict[@"array"] = [self.viewModel.craftsArray subarrayWithRange:NSMakeRange(indexPath.row + 1, length)];
-                isMatched = YES;
-                break;
-            }
-        }
-        if (!isMatched) {
-            modelDict[@"array"] = [self.viewModel.craftsArray subarrayWithRange:NSMakeRange(indexPath.row + 1, length)];
-            modelDict[@"name"] = selectedModel.name;
-            [self.viewModel.statesArray addObject:modelDict];
-        }
+        
+        // 更新statesDictionary
+        self.viewModel.statesDictionary[selectedModel.craft_id] = modelArray;
+        // 删除数据
         [self.viewModel.craftsArray removeObjectsInRange:NSMakeRange(indexPath.row + 1, length)];
         //执行删除行
         [tableView beginUpdates];
-        [tableView deleteRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView deleteRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationAutomatic];
         [tableView endUpdates];
     }
 }
@@ -147,12 +139,12 @@
     NSInteger key = [[self getLastStringWith:model.level_code separateBy:@"."] integerValue];
     
     while (i < j) {
-        while (i < j && [self getCondition1WithArray:marray key:key index:j]) {//从右边找到比key小的
+        while (i < j && [self getCondition1WithArray:marray key:key index:j]) {  // 从右边找到比key小的
             j--;
         }
         marray[i] = marray[j];
         
-        while (i < j && [self getCondition2WithArray:marray key:key index:i]) {//从左边找到比key大的
+        while (i < j && [self getCondition2WithArray:marray key:key index:i]) {  // 从左边找到比key大的
             i++;
         }
         marray[j] = marray[i];
