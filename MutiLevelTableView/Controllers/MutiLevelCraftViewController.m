@@ -53,6 +53,47 @@
     //获取点击行的数据model
     MutiLevelCraftModel *selectedModel = self.viewModel.craftsArray[indexPath.row];
     
+    BOOL isMatched = NO;
+    for (MutiLevelCraftModel *craftModel in self.viewModel.allCraftsArray) {
+        if ([craftModel.craft_id isEqualToString:selectedModel.craft_id]) {
+            continue;
+        }
+        if ([craftModel.pid isEqualToString:selectedModel.craft_id]) {
+            isMatched = YES;
+            break;
+        }
+    }
+    if (!isMatched) {
+        /*
+         1.倒序查找父节点即可找到层级关系
+         2.查找思路：对比level值大小，倒序找到第一个比自己level值小的即为自己的父级
+         3.level值的层级关系定义是：level值为0->1->2->3...
+         */
+        // 初始化第一个节点为本节点
+        NSMutableArray<MutiLevelCraftModel *> *marray = [NSMutableArray arrayWithObject:selectedModel];
+        // 初始化str
+        NSString *str = selectedModel.name;
+        // 初始化level
+        NSInteger level = [selectedModel.level_code componentsSeparatedByString:@"."].count;
+        for (NSInteger i = indexPath.row - 1; i >= 0; i--) {
+            MutiLevelCraftModel *tmpModel = self.viewModel.craftsArray[i];
+            NSInteger tmpLevel = [tmpModel.level_code componentsSeparatedByString:@"."].count;
+            if (level > tmpLevel) {
+                str = [NSString stringWithFormat:@"%@->%@", tmpModel.name, str];
+                [marray insertObject:tmpModel atIndex:0];
+                // 重置level
+                level = tmpLevel;
+            }
+            if (tmpLevel == 1) {
+                break;
+            }
+        }
+        NSLog(@"你的选择：%@", selectedModel.name);
+        NSLog(@"层级关系：%@", str);
+        [self.navigationController popViewControllerAnimated:YES];
+        return;
+    }
+    
     if (!selectedModel.isExpand) {
 #pragma mark - 展开级联
         selectedModel.isExpand = YES;

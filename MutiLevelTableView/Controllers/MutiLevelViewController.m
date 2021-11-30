@@ -53,6 +53,32 @@
     MutiLevelCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
     if (!model.children) {
+        /*
+         1.倒序查找父节点即可找到层级关系，如：北京->市辖区->朝阳区
+         2.查找思路：对比level值大小，倒序找到第一个比自己level值小的即为自己的父级
+         3.level值的层级关系定义是：比如北京->市辖区->朝阳区对应的level值为0->1->2
+         */
+        // placesStr保存拼接的层级（节点），初始化为本节点
+        NSString *str = [NSString stringWithString:model.name];
+        // 初始化marray保存第一个本节点
+        NSMutableArray<MutiLevelModel *> *marray = [NSMutableArray arrayWithObject:model];
+        // 初始化tmpLevel为当前model的level
+        NSInteger level = model.level;
+        for (NSInteger i = indexPath.row - 1; i >= 0; i--) {
+            MutiLevelModel *tmpModel = self.viewModel.placesArray[i];
+            if (level > tmpModel.level) {
+                str = [NSString stringWithFormat:@"%@->%@", tmpModel.name, str];
+                [marray insertObject:tmpModel atIndex:0];
+                // 重置节点tmpLevel为当前条件匹配的tmpModel.level
+                level = tmpModel.level;
+            }
+            if (tmpModel.level == 0) {
+                break;
+            }
+        }
+        NSLog(@"你的选择：%@", model.name);
+        NSLog(@"层级关系：%@", str);
+        [self.navigationController popViewControllerAnimated:YES];
         return;
     }
     if (!model.isExpand) {
