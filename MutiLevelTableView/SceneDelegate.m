@@ -10,15 +10,15 @@
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
       //设置全局cell分割线与屏幕等宽
-        [[UITableView appearance] setSeparatorStyle:UITableViewCellSeparatorStyleSingleLine];
-        [[UITableView appearance] setSeparatorInset:UIEdgeInsetsZero];
-        [[UITableViewCell appearance] setSeparatorInset:UIEdgeInsetsZero];
-    
-        if ([UITableView instancesRespondToSelector:@selector(setLayoutMargins:)]) {
-            [[UITableView appearance] setLayoutMargins:UIEdgeInsetsZero];
-            [[UITableViewCell appearance] setLayoutMargins:UIEdgeInsetsZero];
-            [[UITableViewCell appearance] setPreservesSuperviewLayoutMargins:NO];
-        }
+    [[UITableView appearance] setSeparatorStyle:UITableViewCellSeparatorStyleSingleLine];
+    [[UITableView appearance] setSeparatorInset:UIEdgeInsetsZero];
+    [[UITableViewCell appearance] setSeparatorInset:UIEdgeInsetsZero];
+
+    if ([UITableView instancesRespondToSelector:@selector(setLayoutMargins:)]) {
+        [[UITableView appearance] setLayoutMargins:UIEdgeInsetsZero];
+        [[UITableViewCell appearance] setLayoutMargins:UIEdgeInsetsZero];
+        [[UITableViewCell appearance] setPreservesSuperviewLayoutMargins:NO];
+    }
     
     ViewController *vc = [[ViewController alloc] init];
     vc.view.backgroundColor = [UIColor whiteColor];
